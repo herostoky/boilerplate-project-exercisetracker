@@ -33,6 +33,24 @@ app.post("/api/users", function (req, res) {
     });
 });
 
+app.get("/api/users", function (req, res) {
+  let isSuccess = false;
+  UserModel.find()
+    .then(function (data) {
+      isSuccess = true;
+      res.json(data);
+      return;
+    })
+    .catch(function (err) {
+      if (!isSuccess) {
+        res.json(err);
+        return;
+      }
+    });
+});
+
+// /api/users/:_id/exercises
+
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
