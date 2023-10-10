@@ -11,6 +11,7 @@ const logger = require("./logger");
 app.use(logger);
 
 const { UserModel } = require("./user");
+const { ExerciseModel } = require("./exercise");
 
 app.post("/api/users", function (req, res) {
   let username = req.body.username;
@@ -49,7 +50,43 @@ app.get("/api/users", function (req, res) {
     });
 });
 
-// /api/users/:_id/exercises
+app.post("/api/users/:_id/exercises", async function (req, res) {
+  const userId = req.params._id;
+  const description = req.body.description;
+  const duration = Number(req.body.duration);
+  let date = req.body.date;
+  if (!date) {
+    date = new Date();
+  }
+  // Get the user
+  const user = await UserModel.findById(userId);
+  let exerciseEntity = new ExerciseModel({
+    username: user.username,
+    description: description,
+    duration: duration,
+    date: date,
+  });
+  let isSuccess = false;
+  exerciseEntity
+    .save()
+    .then(function (data) {
+      isSuccess = true;
+      res.json({
+        username: data.username,
+        description: data.description,
+        duration: data.duration,
+        date: data.date.toDateString(),
+        _id: data._id,
+      });
+      return;
+    })
+    .catch(function (err) {
+      if (!isSuccess) {
+        res.json(err);
+        return;
+      }
+    });
+});
 
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
