@@ -88,6 +88,38 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
     });
 });
 
+app.get("/api/users/:_id/logs", async function (req, res) {
+  const userId = req.params._id;
+  // Get the user
+  const user = await UserModel.findById(userId);
+  let isSuccess = false;
+  ExerciseModel.find({ username: user.username })
+    .then(function (data) {
+      isSuccess = true;
+      let result = {
+        username: user.username,
+        count: data.length,
+        _id: user._id,
+        log: [],
+      };
+      data.forEach((element) => {
+        result.log.push({
+          description: element.description,
+          duration: element.duration,
+          date: element.date.toDateString(),
+        });
+      });
+      res.json(result);
+      return;
+    })
+    .catch(function (err) {
+      if (!isSuccess) {
+        res.json(err);
+        return;
+      }
+    });
+});
+
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });

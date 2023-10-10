@@ -1,6 +1,8 @@
 const logger = (req, res, next) => {
   const requestStart = Date.now();
-  console.log(`[${requestStart}] ${req.url} ${JSON.stringify(req.body)}`);
+  console.log(
+    `[${requestStart}] ${req.method}: ${req.url} ${JSON.stringify(req.body)}`
+  );
   let responseEnd = Date.now();
 
   const defaultWrite = res.write;
