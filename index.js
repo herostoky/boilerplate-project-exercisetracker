@@ -93,7 +93,15 @@ app.get("/api/users/:_id/logs", async function (req, res) {
   // Get the user
   const user = await UserModel.findById(userId);
   let isSuccess = false;
-  ExerciseModel.find({ username: user.username })
+  let filter = { username: user?.username };
+  if (req.query.from && req.query.to) {
+    filter.date = { $gte: req.query.from, $lte: req.query.to };
+  }
+  let limit = req.query.limit;
+  if (!limit) {
+    limit = -1;
+  }
+  ExerciseModel.find(filter)
     .then(function (data) {
       isSuccess = true;
       let result = {
@@ -102,12 +110,16 @@ app.get("/api/users/:_id/logs", async function (req, res) {
         _id: user._id,
         log: [],
       };
+      let added = 0;
       data.forEach((element) => {
-        result.log.push({
-          description: element.description,
-          duration: element.duration,
-          date: element.date.toDateString(),
-        });
+        if (limit == -1 || added < limit) {
+          result.log.push({
+            description: element.description,
+            duration: element.duration,
+            date: element.date.toDateString(),
+          });
+        }
+        added += 1;
       });
       res.json(result);
       return;
