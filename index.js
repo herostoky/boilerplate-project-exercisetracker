@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+const bodyParser = require("body-parser");
 require("dotenv").config();
 
 app.use(cors());
@@ -16,10 +17,20 @@ app.post("/api/users", function (req, res) {
   let userEntity = new UserModel({
     username: username,
   });
-  userEntity.save(function (err, data) {
-    if (err) return console.error(err);
-    res.json(data);
-  });
+  let isSuccess = false;
+  userEntity
+    .save()
+    .then(function (data) {
+      isSuccess = true;
+      res.json(data);
+      return;
+    })
+    .catch(function (err) {
+      if (!isSuccess) {
+        res.json(err);
+        return;
+      }
+    });
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
